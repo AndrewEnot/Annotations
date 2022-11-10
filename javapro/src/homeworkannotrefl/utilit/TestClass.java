@@ -13,38 +13,34 @@ import homeworkannotrefl.api.annotations.Test;
 /**
  * This class is only for methods with annotations @BeforeSuite, @Test, @AfterSuite
  */
-public class TestClass<T> {
+public class TestClass {
 
-  private final Class<T> clazz;
-
-  public TestClass(Class<T> clazz) {
-    this.clazz = clazz;
+  public TestClass() {
+    //This class is only for methods with annotations @BeforeSuite, @Test, @AfterSuite
   }
 
-  @Test(priority = 1)
   @BeforeSuite
-  public void testOne(String number) {
-    System.out.println(number + " test 1 " + clazz.getName());
+  public void testOne() {
+    System.out.println(" test 1 ");
   }
 
   @Test(priority = 2)
-  public void testTwoOne(String number) {
-    System.out.println(number + " test 21 " + clazz.getName());
+  public void testTwoOne() {
+    System.out.println(" test 21 ");
   }
 
   @Test(priority = 6)
-  public void testTwoTwo(String number) {
-    System.out.println(number + " test 23 " + clazz.getName());
+  public void testTwoTwo() {
+    System.out.println(" test 23 ");
   }
 
   @Test(priority = 4)
-  public void testTwoThree(String number) {
-    System.out.println(number + " test 22 " + clazz.getName());
+  public void testTwoThree() {
+    System.out.println(" test 22 ");
   }
 
-  @Test(priority = 1)
   @AfterSuite
-  public void testThree(String number) {
-    System.out.println(number + " test 3 " + clazz.getName());
+  public void testThree() {
+    System.out.println(" test 3 ");
   }
 }
