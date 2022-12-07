@@ -11,6 +11,7 @@ import homeworkannotrefl.api.annotations.BeforeSuite;
 import homeworkannotrefl.api.exceptions.MyException;
 import homeworkannotrefl.api.annotations.Test;
 import homeworkannotrefl.utilit.TestClass;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -33,37 +34,20 @@ public class TestRunner {
       // @AfterSuite in case if there is more than one method - we throw Exception and stop process
       // of testing
       try {
-        if (methods.stream()
-            .filter(a -> a.isAnnotationPresent(BeforeSuite.class))
-            .count() > 1) {
-          throw new MyException("Excessive method with annotation @BeforeSuite in class-method!");
-        }
-        if (methods.stream()
-            .filter(a -> a.isAnnotationPresent(AfterSuite.class))
-            .count() > 1) {
-          throw new MyException("Excessive method with annotation @AfterSuite in class-method!");
-        }
+        checkDoubledAnnotation(methods, BeforeSuite.class);
+        checkDoubledAnnotation(methods, AfterSuite.class);
       } catch (RuntimeException e) {
         System.out.println(e.getMessage());
         return;
       }
 
       //here we start method with annotation BeforeSuite and start testing
-      methods.stream()
-          .filter(a -> a.isAnnotationPresent(BeforeSuite.class))
-          .forEach(a -> {
-            try {
-              a.invoke(clazz.getDeclaredConstructor().newInstance());
-            } catch (ReflectiveOperationException e) {
-              throw new MyException("Exception with invoking!!!");
-            }
-          });
+      invokeMethodWithAnnotation(clazz, methods, BeforeSuite.class);
 
       //here we start method in order of priority, excluding methods with annotations @BeforeSuite
       //and @AfterSuite
       methods.stream()
-          .filter(a -> !a.isAnnotationPresent(BeforeSuite.class))
-          .filter(a -> !a.isAnnotationPresent(AfterSuite.class))
+          .filter(a -> a.isAnnotationPresent(Test.class))
           .sorted(Comparator.comparing(a -> a.getDeclaredAnnotation(Test.class).priority()))
           .forEach(a -> {
             try {
@@ -74,15 +58,30 @@ public class TestRunner {
           });
 
       //here we start method with annotation AfterSuite and finishing our testing
-      methods.stream()
-          .filter(a -> a.isAnnotationPresent(AfterSuite.class))
-          .forEach(a -> {
-            try {
-              a.invoke(clazz.getDeclaredConstructor().newInstance());
-            } catch (ReflectiveOperationException e) {
-              throw new MyException("Exception with invoking!!!");
-            }
-          });
+      invokeMethodWithAnnotation(clazz, methods, AfterSuite.class);
+    }
+  }
+
+  private static <T, S extends Annotation> void invokeMethodWithAnnotation(Class<T> clazz,
+      List<Method> methods, Class<S> annotation) {
+    methods.stream()
+        .filter(a -> a.isAnnotationPresent(annotation))
+        .forEach(a -> {
+          try {
+            a.invoke(clazz.getDeclaredConstructor().newInstance());
+          } catch (ReflectiveOperationException e) {
+            throw new MyException("Exception with invoking!!!");
+          }
+        });
+  }
+
+  private static <T extends Annotation> void checkDoubledAnnotation(List<Method> methods,
+      Class<T> annotation) {
+    if (methods.stream()
+        .filter(a -> a.isAnnotationPresent(annotation))
+        .count() > 1) {
+      throw new MyException(
+          "Excessive method with annotation " + annotation.getName() + " in class-method!");
     }
   }
 }
